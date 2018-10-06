@@ -70,7 +70,7 @@ namespace solution_MVC_Music.Controllers
             }
             catch (DbUpdateException dex)
             {
-                if (dex.InnerException.Message.Contains("IX_Albums_YearProduced_Name"))  
+                if (dex.InnerException.Message.Contains("IX_Albums_Name_YearProduced"))  
                 {
                     ModelState.AddModelError("", "Unable to save changes. Remember, you cannot have duplicate Title and YearProduced.");
                 }
@@ -133,7 +133,7 @@ namespace solution_MVC_Music.Controllers
                 }
                 catch (DbUpdateException dex)
                 {
-                    if (dex.InnerException.Message.Contains("IX_Albums_YearProduced_Name"))
+                    if (dex.InnerException.Message.Contains("IX_Albums_Name_YearProduced"))
                     {
                         ModelState.AddModelError("", "Unable to save changes. Remember, you cannot have duplicate Title and YearProduced.");
                     }
@@ -183,7 +183,7 @@ namespace solution_MVC_Music.Controllers
             {
                 if (dex.InnerException.Message.Contains("FK_"))
                 {
-                    ModelState.AddModelError("", "Unable to save changes. Remember, you cannot delete a Musician that has Performances.");
+                    ModelState.AddModelError("", "Unable to save changes. Remember, you cannot delete a Album that has Songs.");
                 }
                 else
                 {

@@ -10,15 +10,15 @@ using solution_MVC_Music.Data;
 namespace solution_MVC_Music.Data.MusicMigrations
 {
     [DbContext(typeof(MusicContext))]
-    [Migration("20180927175559_fixGenres")]
-    partial class fixGenres
+    [Migration("20181006205435_MusicMigrations")]
+    partial class MusicMigrations
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("MUSIC")
-                .HasAnnotation("ProductVersion", "2.1.1-rtm-30846")
+                .HasAnnotation("ProductVersion", "2.1.2-rtm-30932")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
@@ -43,6 +43,9 @@ namespace solution_MVC_Music.Data.MusicMigrations
                     b.HasKey("ID");
 
                     b.HasIndex("GenreID");
+
+                    b.HasIndex("Name", "YearProduced")
+                        .IsUnique();
 
                     b.ToTable("Albums");
                 });
@@ -210,7 +213,7 @@ namespace solution_MVC_Music.Data.MusicMigrations
                     b.HasOne("solution_MVC_Music.Models.Album", "Album")
                         .WithMany("Songs")
                         .HasForeignKey("AlbumID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("solution_MVC_Music.Models.Genre", "Genre")
                         .WithMany("Songs")

@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace solution_MVC_Music.Data.MusicMigrations
 {
-    public partial class InitialCreate : Migration
+    public partial class MusicMigrations : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,16 +12,17 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 name: "MUSIC");
 
             migrationBuilder.CreateTable(
-                name: "Genre",
+                name: "Genres",
                 schema: "MUSIC",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Genre", x => x.ID);
+                    table.PrimaryKey("PK_Genres", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -29,7 +31,8 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,16 +46,19 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Name = table.Column<string>(maxLength: 50, nullable: false),
+                    YearProduced = table.Column<string>(maxLength: 4, nullable: false),
+                    Price = table.Column<decimal>(nullable: false),
                     GenreID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Albums", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Albums_Genre_GenreID",
+                        name: "FK_Albums_Genres_GenreID",
                         column: x => x.GenreID,
                         principalSchema: "MUSIC",
-                        principalTable: "Genre",
+                        principalTable: "Genres",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -64,7 +70,12 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    SIN = table.Column<string>(maxLength: 9, nullable: true),
+                    FirstName = table.Column<string>(maxLength: 30, nullable: false),
+                    MiddleName = table.Column<string>(maxLength: 30, nullable: true),
+                    LastName = table.Column<string>(maxLength: 50, nullable: false),
+                    Phone = table.Column<long>(nullable: false),
+                    DOB = table.Column<DateTime>(nullable: false),
+                    SIN = table.Column<string>(maxLength: 9, nullable: false),
                     InstrumentID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -86,6 +97,7 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Title = table.Column<string>(maxLength: 80, nullable: false),
                     AlbumID = table.Column<int>(nullable: false),
                     GenreID = table.Column<int>(nullable: false)
                 },
@@ -98,12 +110,12 @@ namespace solution_MVC_Music.Data.MusicMigrations
                         principalSchema: "MUSIC",
                         principalTable: "Albums",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Songs_Genre_GenreID",
+                        name: "FK_Songs_Genres_GenreID",
                         column: x => x.GenreID,
                         principalSchema: "MUSIC",
-                        principalTable: "Genre",
+                        principalTable: "Genres",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -169,6 +181,13 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 column: "GenreID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Albums_Name_YearProduced",
+                schema: "MUSIC",
+                table: "Albums",
+                columns: new[] { "Name", "YearProduced" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Musicians_InstrumentID",
                 schema: "MUSIC",
                 table: "Musicians",
@@ -179,8 +198,7 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 schema: "MUSIC",
                 table: "Musicians",
                 column: "SIN",
-                unique: true,
-                filter: "[SIN] IS NOT NULL");
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Performances_SongID",
@@ -234,7 +252,7 @@ namespace solution_MVC_Music.Data.MusicMigrations
                 schema: "MUSIC");
 
             migrationBuilder.DropTable(
-                name: "Genre",
+                name: "Genres",
                 schema: "MUSIC");
         }
     }

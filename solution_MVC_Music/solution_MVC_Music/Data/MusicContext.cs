@@ -79,7 +79,7 @@ namespace solution_MVC_Music.Data
                 .HasMany<Song>(p => p.Songs)
                 .WithOne(c => c.Album)
                 .HasForeignKey(c => c.AlbumID)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
             //Prevent Cascade Delete Album to Song (Child Perspective)
             //modelBuilder.Entity<Song>()
             //    .HasOne(c => c.Album)

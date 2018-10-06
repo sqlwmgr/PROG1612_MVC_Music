@@ -211,7 +211,7 @@ namespace solution_MVC_Music.Data.MusicMigrations
                     b.HasOne("solution_MVC_Music.Models.Album", "Album")
                         .WithMany("Songs")
                         .HasForeignKey("AlbumID")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("solution_MVC_Music.Models.Genre", "Genre")
                         .WithMany("Songs")
