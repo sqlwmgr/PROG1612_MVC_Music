@@ -59,11 +59,25 @@ namespace solution_MVC_Music.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name,YearProduced,Price,GenreID")] Album album)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(album);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(album);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException dex)
+            {
+                if (dex.InnerException.Message.Contains("IX_Albums_YearProduced_Name"))  
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Remember, you cannot have duplicate Title and YearProduced.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                }
             }
             ddlValues(album);
             return View(album);
@@ -91,23 +105,24 @@ namespace solution_MVC_Music.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Name,YearProduced,Price,GenreID")] Album album)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id != album.ID)
+            var albumToUpdate = await _context.Albums.SingleOrDefaultAsync(a => a.ID == id);
+            if (albumToUpdate == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (await TryUpdateModelAsync<Album>(albumToUpdate, "", a => a.ID, a => a.Name, a => a.YearProduced, a => a.Price, a => a.GenreID))
             {
                 try
                 {
-                    _context.Update(album);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AlbumExists(album.ID))
+                    if (!AlbumExists(albumToUpdate.ID))
                     {
                         return NotFound();
                     }
@@ -116,10 +131,20 @@ namespace solution_MVC_Music.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (DbUpdateException dex)
+                {
+                    if (dex.InnerException.Message.Contains("IX_Albums_YearProduced_Name"))
+                    {
+                        ModelState.AddModelError("", "Unable to save changes. Remember, you cannot have duplicate Title and YearProduced.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                    }
+                }
             }
-            ddlValues(album);
-            return View(album);
+            ddlValues(albumToUpdate);
+            return View(albumToUpdate);
         }
 
         // GET: Albums/Delete/5
@@ -147,9 +172,26 @@ namespace solution_MVC_Music.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var album = await _context.Albums.FindAsync(id);
-            _context.Albums.Remove(album);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            try
+            {
+                _context.Albums.Remove(album);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException dex)
+            {
+                if (dex.InnerException.Message.Contains("FK_"))
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Remember, you cannot delete a Musician that has Performances.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                }
+            }
+
+            return View(album);
         }
 
         private void ddlValues(Album selItem = null)

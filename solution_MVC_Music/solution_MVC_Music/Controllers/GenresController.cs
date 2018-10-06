@@ -56,11 +56,18 @@ namespace solution_MVC_Music.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,Name")] Genre genre)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(genre);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(genre);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException dex)
+            {
+                ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
             }
             return View(genre);
         }
@@ -88,21 +95,22 @@ namespace solution_MVC_Music.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ID,Name")] Genre genre)
         {
-            if (id != genre.ID)
+            var genreToUpdate = await _context.Genres.SingleOrDefaultAsync(g => g.ID == id);
+            if (genreToUpdate == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (await TryUpdateModelAsync<Genre>(genreToUpdate, "", g => g.ID, g => g.Name))
             {
                 try
                 {
-                    _context.Update(genre);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!GenreExists(genre.ID))
+                    if (!GenreExists(genreToUpdate.ID))
                     {
                         return NotFound();
                     }
@@ -111,9 +119,12 @@ namespace solution_MVC_Music.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (DbUpdateException dex)
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                }
             }
-            return View(genre);
+            return View(genreToUpdate);
         }
 
         // GET: Genres/Delete/5
@@ -140,9 +151,26 @@ namespace solution_MVC_Music.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var genre = await _context.Genres.FindAsync(id);
-            _context.Genres.Remove(genre);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            try
+            {
+                _context.Genres.Remove(genre);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException dex)
+            {
+                if (dex.InnerException.Message.Contains("FK_"))
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Remember, you cannot delete a Musician that has Performances.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                }
+            }
+
+            return View(genre);
         }
 
         private bool GenreExists(int id)

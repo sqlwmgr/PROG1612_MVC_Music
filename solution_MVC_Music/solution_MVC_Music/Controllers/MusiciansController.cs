@@ -59,11 +59,25 @@ namespace solution_MVC_Music.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ID,FirstName,MiddleName,LastName,Phone,DOB,SIN,InstrumentID")] Musician musician)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(musician);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(musician);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException dex)
+            {
+                if (dex.InnerException.Message.Contains("IX_Musicians_SIN")) 
+                {
+                    ModelState.AddModelError("SIN", "Unable to save changes. Remember, you cannot have duplicate SIN numbers.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                }
             }
             ddlValues(musician);
             return View(musician);
@@ -91,23 +105,26 @@ namespace solution_MVC_Music.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,FirstName,MiddleName,LastName,Phone,DOB,SIN,InstrumentID")] Musician musician)
+        public async Task<IActionResult> Edit(int id)
         {
-            if (id != musician.ID)
+            var musicianToUpdate = await _context.Musicians.SingleOrDefaultAsync(m => m.ID == id);
+            if (musicianToUpdate == null)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (await TryUpdateModelAsync<Musician>(musicianToUpdate, "",
+                m => m.ID, m => m.FirstName, m => m.MiddleName, m => m.LastName,
+                m => m.Phone, m => m.DOB, m => m.SIN, m => m.InstrumentID))
             {
                 try
                 {
-                    _context.Update(musician);
                     await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!MusicianExists(musician.ID))
+                    if (!MusicianExists(musicianToUpdate.ID))
                     {
                         return NotFound();
                     }
@@ -116,10 +133,20 @@ namespace solution_MVC_Music.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
+                catch (DbUpdateException dex)
+                {
+                    if (dex.InnerException.Message.Contains("IX_Musicians_SIN"))
+                    {
+                        ModelState.AddModelError("SIN", "Unable to save changes. Remember, you cannot have duplicate SIN numbers.");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                    }
+                }
             }
-            ddlValues(musician);
-            return View(musician);
+            ddlValues(musicianToUpdate);
+            return View(musicianToUpdate);
         }
 
         // GET: Musicians/Delete/5
@@ -147,9 +174,26 @@ namespace solution_MVC_Music.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var musician = await _context.Musicians.FindAsync(id);
-            _context.Musicians.Remove(musician);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            try
+            {
+                _context.Musicians.Remove(musician);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException dex)
+            {
+                if (dex.InnerException.Message.Contains("FK_"))
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Remember, you cannot delete a Musician that has Performances.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Unable to save changes. Try again, and if the problem persists see your system administrator.");
+                }
+            }
+
+            return View(musician);
         }
 
         private void ddlValues(Musician selItem = null)
