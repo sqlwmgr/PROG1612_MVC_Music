@@ -16,6 +16,14 @@ namespace solution_MVC_Music.Models
         }
         public int ID { get; set; }
 
+        [Display(Name = "Summary")]
+        public string Summary
+        {
+            get
+            {
+                return Name + " album was produced in " + YearProduced;
+            }
+        }
 
         [Display(Name = "Album")]
         [Required(ErrorMessage = "You cannot leave the Album name blank.")]

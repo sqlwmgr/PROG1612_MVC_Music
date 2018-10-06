@@ -16,6 +16,25 @@ namespace solution_MVC_Music.Models
 
         public int ID { get; set; }
 
+        [Display(Name = "Musician")]
+        public string FullName
+        {
+            get
+            {
+                return FirstName + (string.IsNullOrEmpty(MiddleName) ? " " : (" " + (char?)MiddleName[0] + ". ").ToUpper()) + LastName;
+            }
+        }
+
+        [ScaffoldColumn(false)]
+        [Display(Name = "Formal Name")]
+        public string FormalName
+        {
+            get
+            {
+                return LastName + ", " + FirstName + (string.IsNullOrEmpty(MiddleName) ? "" : (" " + (char?)MiddleName[0] + ".").ToUpper());
+            }
+        }
+
         [Display(Name = "First Name")]
         [Required(ErrorMessage = "You cannot leave the first name blank.")]
         [StringLength(30, ErrorMessage = "First name cannot be more than 30 characters long.")]
