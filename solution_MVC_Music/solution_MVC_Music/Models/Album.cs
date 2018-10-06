@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace solution_MVC_Music.Models
 {
-    public class Album
+    public class Album : IValidatableObject
     {
         public Album()
         {
@@ -39,5 +39,14 @@ namespace solution_MVC_Music.Models
         public Genre Genre { get; set; }
 
         public ICollection<Song> Songs { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            int year = Convert.ToInt32(YearProduced);
+            if (year > (DateTime.Now.Year + 1))
+            {
+                yield return new ValidationResult("Year Produced can be more than one year in the future.", new[] { "YearProduced" });
+            }
+        }
     }
 }
