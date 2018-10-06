@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace solution_MVC_Music.Models
 {
-    public class Musician
+    public class Musician : IValidatableObject
     {
         public Musician()
         {
@@ -53,5 +53,12 @@ namespace solution_MVC_Music.Models
         public ICollection<Performance> Performances { get; set; }
         public ICollection<Plays> Plays { get; set; }
 
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (DOB > DateTime.Now.AddYears(-5))
+            {
+                yield return new ValidationResult("Musician must be at least 5 years old.", new[] { "DOB" });
+            }
+        }
     }
 }
