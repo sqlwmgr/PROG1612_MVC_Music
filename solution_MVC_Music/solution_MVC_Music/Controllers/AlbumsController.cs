@@ -48,7 +48,7 @@ namespace solution_MVC_Music.Controllers
         // GET: Albums/Create
         public IActionResult Create()
         {
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name");
+            ddlValues();
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace solution_MVC_Music.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name", album.GenreID);
+            ddlValues(album);
             return View(album);
         }
 
@@ -82,7 +82,7 @@ namespace solution_MVC_Music.Controllers
             {
                 return NotFound();
             }
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name", album.GenreID);
+            ddlValues(album);
             return View(album);
         }
 
@@ -118,7 +118,7 @@ namespace solution_MVC_Music.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name", album.GenreID);
+            ddlValues(album);
             return View(album);
         }
 
@@ -150,6 +150,14 @@ namespace solution_MVC_Music.Controllers
             _context.Albums.Remove(album);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private void ddlValues(Album selItem = null)
+        {
+            var genres = from g in _context.Genres
+                              orderby g.Name
+                              select g;
+            ViewData["GenreID"] = new SelectList(genres, "ID", "Name", selItem?.GenreID);
         }
 
         private bool AlbumExists(int id)

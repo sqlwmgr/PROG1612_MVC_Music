@@ -48,7 +48,7 @@ namespace solution_MVC_Music.Controllers
         // GET: Musicians/Create
         public IActionResult Create()
         {
-            ViewData["InstrumentID"] = new SelectList(_context.Instruments, "ID", "Name");
+            ddlValues();
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace solution_MVC_Music.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["InstrumentID"] = new SelectList(_context.Instruments, "ID", "Name", musician.InstrumentID);
+            ddlValues(musician);
             return View(musician);
         }
 
@@ -82,7 +82,7 @@ namespace solution_MVC_Music.Controllers
             {
                 return NotFound();
             }
-            ViewData["InstrumentID"] = new SelectList(_context.Instruments, "ID", "Name", musician.InstrumentID);
+            ddlValues(musician);
             return View(musician);
         }
 
@@ -118,7 +118,7 @@ namespace solution_MVC_Music.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["InstrumentID"] = new SelectList(_context.Instruments, "ID", "Name", musician.InstrumentID);
+            ddlValues(musician);
             return View(musician);
         }
 
@@ -150,6 +150,14 @@ namespace solution_MVC_Music.Controllers
             _context.Musicians.Remove(musician);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private void ddlValues(Musician selItem = null)
+        {
+            var instruments = from i in _context.Instruments
+                              orderby i.Name
+                              select i;
+            ViewData["InstrumentID"] = new SelectList(instruments, "ID", "Name", selItem?.InstrumentID);
         }
 
         private bool MusicianExists(int id)

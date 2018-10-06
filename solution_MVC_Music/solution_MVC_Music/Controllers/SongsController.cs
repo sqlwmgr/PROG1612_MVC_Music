@@ -49,8 +49,7 @@ namespace solution_MVC_Music.Controllers
         // GET: Songs/Create
         public IActionResult Create()
         {
-            ViewData["AlbumID"] = new SelectList(_context.Albums, "ID", "Name");
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name");
+            ddlValues();
             return View();
         }
 
@@ -67,8 +66,7 @@ namespace solution_MVC_Music.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AlbumID"] = new SelectList(_context.Albums, "ID", "Name", song.AlbumID);
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name", song.GenreID);
+            ddlValues(song);
             return View(song);
         }
 
@@ -85,8 +83,7 @@ namespace solution_MVC_Music.Controllers
             {
                 return NotFound();
             }
-            ViewData["AlbumID"] = new SelectList(_context.Albums, "ID", "Name", song.AlbumID);
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name", song.GenreID);
+            ddlValues(song);
             return View(song);
         }
 
@@ -122,8 +119,7 @@ namespace solution_MVC_Music.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["AlbumID"] = new SelectList(_context.Albums, "ID", "Name", song.AlbumID);
-            ViewData["GenreID"] = new SelectList(_context.Genres, "ID", "Name", song.GenreID);
+            ddlValues(song);
             return View(song);
         }
 
@@ -156,6 +152,19 @@ namespace solution_MVC_Music.Controllers
             _context.Songs.Remove(song);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private void ddlValues(Song selItem = null)
+        {
+            var albums = from i in _context.Albums
+                              orderby i.Name
+                              select i;
+            ViewData["AlbumID"] = new SelectList(albums, "ID", "Name", selItem?.AlbumID);
+
+            var genres = from i in _context.Genres
+                         orderby i.Name
+                         select i;
+            ViewData["GenreID"] = new SelectList(genres, "ID", "Name", selItem?.GenreID);
         }
 
         private bool SongExists(int id)
