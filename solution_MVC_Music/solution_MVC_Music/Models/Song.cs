@@ -19,11 +19,13 @@ namespace solution_MVC_Music.Models
         public string Title { get; set; }
 
         [Display(Name = "Album")]
+        //[Range(1, int.MaxValue, ErrorMessage = "You must select the Album.")]
         [Range(1, int.MaxValue, ErrorMessage = "You must select the Album.")]
         public int AlbumID { get; set; }
         public Album Album { get; set; }
 
         [Display(Name = "Genre")]
+        //[Range(1, int.MaxValue, ErrorMessage = "You must select the Genre for the song.")]
         [Range(1, int.MaxValue, ErrorMessage = "You must select the Genre for the song.")]
         public int GenreID { get; set; }
         public Genre Genre { get; set; }

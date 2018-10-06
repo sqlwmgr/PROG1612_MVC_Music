@@ -65,6 +65,7 @@ namespace solution_MVC_Music.Models
         public string SIN { get; set; }
 
         [Display(Name = "Principal Instrument")]
+        //[Range(1, int.MaxValue,ErrorMessage = "You must select the principal instrument the musician plays.")]
         [Range(1,int.MaxValue,ErrorMessage ="You must select the principal instrument the musician plays.")]
         public int InstrumentID { get; set; }
         public Instrument Instrument { get; set; }

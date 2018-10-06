@@ -44,7 +44,10 @@
             </div>
             <div class="form-group">
                 <label asp-for="InstrumentID" class="control-label"></label>
-                <select asp-for="InstrumentID" class ="form-control" asp-items="ViewBag.InstrumentID"></select>
+                <select asp-for="InstrumentID" class="form-control" asp-items="ViewBag.InstrumentID">
+                    <option>Select a Instrument</option>
+                </select>
+                <span asp-validation-for="InstrumentID" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-default" />

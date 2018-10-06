@@ -42,6 +42,7 @@ namespace solution_MVC_Music.Models
         public decimal Price { get; set; }
 
         [Display(Name = "Genre")]
+        //[Range(1, int.MaxValue, ErrorMessage = "You must select the primary Genre of the Album.")]
         [Range(1, int.MaxValue, ErrorMessage = "You must select the primary Genre of the Album.")]
         public int GenreID { get; set; }
         public Genre Genre { get; set; }
