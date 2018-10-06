@@ -39,6 +39,10 @@ namespace solution_MVC_Music.Data
             .HasIndex(p => p.SIN)
             .IsUnique();
 
+            modelBuilder.Entity<Album>()
+                .HasIndex(a => new { a.Name, a.YearProduced })
+                .IsUnique();
+
             //NOTE: EACH OF THE FOLLOWING DELETE RESTRICTIONS
             //      CAN BE WRITTEN TWO WAYS: 
             //          FROM THE PARENT TABLE PERSPECTIVE OR
